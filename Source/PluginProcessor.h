@@ -63,7 +63,7 @@ public:
     {
         Phase,
         Chorus,
-        Overdrive,
+        OverDrive,
         LadderFilter,
         END_OF_LIST
     };
