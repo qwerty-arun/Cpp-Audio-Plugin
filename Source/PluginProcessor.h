@@ -9,6 +9,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+//#include "../SimpleMultiBandComp/Source/DSP/Fifo.h"
+#include <Fifo.h>
 
 //==============================================================================
 /**
@@ -68,6 +70,9 @@ public:
 
     //array alias
     using DSP_Order = std::array < DSP_Option, static_cast<size_t>(DSP_Option::END_OF_LIST)>;
+
+    //FIFO Instance
+    SimpleMBComp::Fifo<DSP_Order> dspOrderFifo;
 
 private:
     DSP_Order dspOrder; // Create an object
