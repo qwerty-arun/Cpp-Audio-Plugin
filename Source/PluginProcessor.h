@@ -68,6 +68,11 @@ public:
         END_OF_LIST
     };
 
+    //static function
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    //declare an instance
+    juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Settings", createParameterLayout() };
+
     //array alias
     using DSP_Order = std::array < DSP_Option, static_cast<size_t>(DSP_Option::END_OF_LIST)>;
 
