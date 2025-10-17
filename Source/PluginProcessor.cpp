@@ -45,7 +45,13 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &phaserCenterFreqHz,
         &phaserDepthPercent,
         &phaserFeedbackPercent,
-        &phaserMixPercent
+        &phaserMixPercent,
+
+        &chorusRateHz,
+        &chorsuDepthPercent,
+        &chorusCenterDelayMs,
+        &chorusFeedbackPercent,
+        &chorusMixPercent,
     };
 
     // array of function pointers -> each one returns the string ID of a parameter
@@ -54,8 +60,14 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &getPhaserRateName,
         &getPhaserCenterFreqName,
         &getPhaserDepthName,
-        & getPhaserFeedbackName,
-        &getPhaserMixName
+        &getPhaserFeedbackName,
+        &getPhaserMixName,
+
+        &getChorusRateName,
+        &getChorusDepthName,
+        &getChorusCenterDelayName,
+        &getChorusFeedbackName,
+        &getChorusMixName,
     };
 
     for (size_t i = 0; i < floatParams.size(); ++i)
@@ -249,7 +261,51 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
     Mix: 0 to 1
     */
 
+    //chorus rate: Hz
+    name = getChorusRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(0.01f, 100.f, 0.01f, 1.f),
+        0.2f,
+        "Hz"));
     return layout;
+
+    //depth: 0 to 1
+    name = getChorusDepthName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(0.01f, 1.f, 0.01f, 1.f),
+        0.05f,
+        "%"));
+
+    //center delay: milliseconds (1 to 100)
+    name = getPhaserRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(1.f, 100.f, 0.1f, 1.f),
+        7.f,
+        "%"));
+
+    //feedback: -1 to 1
+    name = getPhaserRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f),
+        0.0f,
+        "%"));
+
+    //mix: 0 to 1
+    name = getPhaserRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(0.1f, 1.f, 0.01f, 1.f),
+        0.05f,
+        "%"));
 }
 
 void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
