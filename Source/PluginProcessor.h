@@ -79,6 +79,21 @@ public:
     //FIFO Instance
     SimpleMBComp::Fifo<DSP_Order> dspOrderFifo;
 
+    /*
+        Phaser:
+            Rate: Hz
+            Depth: 0 to 1
+            Ceenter freq: Hz
+            Feedback: -1 to +1
+            Mix: 0 to 1
+    */
+
+    //cached audio parameter pointers for each of the parameters above.
+    juce::AudioParameterFloat* phaserRateHz = nullptr;
+    juce::AudioParameterFloat* phaserCenterFreqHz = nullptr;
+    juce::AudioParameterFloat* phaserDepthPercent = nullptr;
+    juce::AudioParameterFloat* phaserFeedbackPercent = nullptr;
+    juce::AudioParameterFloat* phaserMixPercent = nullptr;
 private:
     DSP_Order dspOrder; // Create an object
     
