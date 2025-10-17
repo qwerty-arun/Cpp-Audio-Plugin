@@ -39,7 +39,7 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
     * array of pointers to pointers->each element is a pointer to one of your member variables, like &phaserRateHz,
     * which itself is a juce::AudioParameterFloat*
     */
-    auto phaserParams = std::array
+    auto floatParams = std::array
     {
         &phaserRateHz,
         &phaserCenterFreqHz,
@@ -49,7 +49,7 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
     };
 
     // array of function pointers -> each one returns the string ID of a parameter
-    auto phaserFuncs = std::array
+    auto floatNameFuncs = std::array
     {
         &getPhaserRateName,
         &getPhaserCenterFreqName,
@@ -58,10 +58,10 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &getPhaserMixName
     };
 
-    for (size_t i = 0; i < phaserParams.size(); ++i)
+    for (size_t i = 0; i < floatParams.size(); ++i)
     {
-        auto ptrToParamPtr = phaserParams[i];
-        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter( phaserFuncs[i]() ));
+        auto ptrToParamPtr = floatParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter( floatNameFuncs[i]() ));
         jassert(*ptrToParamPtr != nullptr);
     }
 
