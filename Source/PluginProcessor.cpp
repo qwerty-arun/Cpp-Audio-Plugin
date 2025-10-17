@@ -40,6 +40,20 @@ auto getLadderFilterChoices() {
     };
 }
 
+auto getGeneralFilterChoices() {
+    return juce::StringArray
+    {
+        "Peak",
+        "bandpass",
+        "notch",
+        "allpass"
+    };
+}
+auto getGeneralFilterModeName() { return juce::String("General Filter Mode"); }
+auto getGeneralFilterFreqName() { return juce::String("General Filter Freq Hz"); }
+auto gerGeneralFilterQualityName() { return juce::String("General Filter Quality"); }
+auto getGeneralFilterGainName() { return juce::String("General Filter Gain"); }
+
 //==============================================================================
 CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -76,6 +90,10 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &ladderFilterCutoffHz,
         &ladderFilterResonance,
         &ladderFilterDrive,
+
+        &generalFilterFreqHz,
+        &generalFilterQuality,
+        &generalFilterGain,
     };
 
     // array of function pointers -> each one returns the string ID of a parameter
@@ -98,6 +116,10 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &getLadderFilterCutoffName,
         &getLadderFilterResonanceName,
         &getLadderFilterDriveName,
+
+        &getGeneralFilterFreqName,
+        &gerGeneralFilterQualityName,
+        &getGeneralFilterGainName,
     };
 
     for (size_t i = 0; i < floatParams.size(); ++i)
@@ -107,8 +129,25 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         jassert(*ptrToParamPtr != nullptr);
     }
 
-    ladderFilterMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter( getLadderFilterModeName() ));
-    jassert(ladderFilterMode != nullptr);
+    auto choiceParams = std::array
+    {
+        &ladderFilterMode,
+        &generalFilterMode,
+    };
+
+    auto choiceNameFuncs = std::array
+    {
+        &getLadderFilterModeName,
+        &getGeneralFilterModeName,
+    };
+
+    for (size_t i = 0; i < choiceParams.size(); ++i)
+    {
+        auto ptrToParamPtr = choiceParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
+        jassert(*ptrToParamPtr != nullptr);
+    }
+
 }
 
 CAudioPluginAudioProcessor::~CAudioPluginAudioProcessor()
@@ -388,6 +427,47 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         1.f,
         ""));
 
+    /*
+        general filter: https://docs.juce.com/develop/structdsp_1_1IIR_1_1Coefficients.html
+        Mode: Peak, bandpass, notch, allpass,
+        freq: 20hz - 20000hx in 1hz steps
+        Q: 0.1 - 10 in 0.05 steps
+        gain: -24db to +24db in 0.5db increments
+    */
+
+    //mode
+    name = getGeneralFilterModeName();
+    choices = getGeneralFilterChoices();
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{ name, versionHint }, name, choices, 0));
+
+    //freq: 20-20kHz in 1Hz steps
+    name = getGeneralFilterFreqName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        750.f,
+        "Hz"));
+
+    //quality: 0.1 - 10 in 0.05 steps
+    name = gerGeneralFilterQualityName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
+        1.f,
+        ""));
+
+    //gain: -24db to + 24db in 0.5db increments
+    name = getGeneralFilterGainName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+        0.f,
+        "dB"));
+
+
     return layout;
 }
 
@@ -407,7 +487,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear (i, 0, buffer.getNumSamples());
 
     //[DONE]: add APVTs
-    //TODO: create audio parameters for all dsp choices
+    //[DONE]: create audio parameters for all dsp choices
     //TODO: update DSP here from audio parameters
     //TODO: save/load settingss
     //TODO: save/load DSP order
@@ -452,6 +532,9 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                 break;
             case DSP_Option::LadderFilter:
                 dspPointers[i] = &ladderFilter;
+                break;
+            case DSP_Option::GeneralFilter:
+                dspPointers[i] = &generalFilter;
                 break;
             case DSP_Option::END_OF_LIST:
                 jassertfalse;
