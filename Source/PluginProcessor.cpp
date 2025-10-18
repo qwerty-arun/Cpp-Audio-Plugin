@@ -221,6 +221,24 @@ void CAudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumInputChannels();
+
+    std::vector<juce::dsp::ProcessorBase*> dsp{
+        &phaser,
+        &chorus,
+        &overdrive,
+        &ladderFilter,
+        &generalFilter,
+    };
+
+    for ( auto p : dsp ) {
+        p->prepare(spec);
+        p->reset();
+    }
 }
 
 void CAudioPluginAudioProcessor::releaseResources()
@@ -494,7 +512,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TODO: Drag-To-Recorder GUI
     //TODO: GUI design for each DSP instance?
     //TODO: metering
-    //TODO: prepare all DSP
+    //[DONE]: prepare all DSP
     //TODO: wet/dry know [BONUS]
     //TODO: mono & stereo versions [mono is BONUS]
     //TODO: modulators [BONUS]
