@@ -61,7 +61,7 @@ public:
     //strongly typed enumeration (scoped enumeration)
     enum class DSP_Option
     {
-        Phase,
+        Phaser,
         Chorus,
         OverDrive,
         LadderFilter,
@@ -97,7 +97,7 @@ public:
     juce::AudioParameterFloat* phaserMixPercent = nullptr;
 
     juce::AudioParameterFloat* chorusRateHz = nullptr;
-    juce::AudioParameterFloat* chorsuDepthPercent = nullptr;
+    juce::AudioParameterFloat* chorusDepthPercent = nullptr;
     juce::AudioParameterFloat* chorusCenterDelayMs = nullptr;
     juce::AudioParameterFloat* chorusFeedbackPercent = nullptr;
     juce::AudioParameterFloat* chorusMixPercent = nullptr;

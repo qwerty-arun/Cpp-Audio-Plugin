@@ -51,7 +51,7 @@ auto getGeneralFilterChoices() {
 }
 auto getGeneralFilterModeName() { return juce::String("General Filter Mode"); }
 auto getGeneralFilterFreqName() { return juce::String("General Filter Freq Hz"); }
-auto gerGeneralFilterQualityName() { return juce::String("General Filter Quality"); }
+auto getGeneralFilterQualityName() { return juce::String("General Filter Quality"); }
 auto getGeneralFilterGainName() { return juce::String("General Filter Gain"); }
 
 //==============================================================================
@@ -80,7 +80,7 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &phaserMixPercent,
 
         &chorusRateHz,
-        &chorsuDepthPercent,
+        &chorusDepthPercent,
         &chorusCenterDelayMs,
         &chorusFeedbackPercent,
         &chorusMixPercent,
@@ -118,7 +118,7 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &getLadderFilterDriveName,
 
         &getGeneralFilterFreqName,
-        &gerGeneralFilterQualityName,
+        &getGeneralFilterQualityName,
         &getGeneralFilterGainName,
     };
 
@@ -369,7 +369,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         "%"));
 
     //center delay: milliseconds (1 to 100)
-    name = getPhaserRateName();
+    name = getChorusCenterDelayName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{ name, versionHint },
         name,
@@ -378,7 +378,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         "%"));
 
     //feedback: -1 to 1
-    name = getPhaserRateName();
+    name = getChorusFeedbackName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{ name, versionHint },
         name,
@@ -387,7 +387,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         "%"));
 
     //mix: 0 to 1
-    name = getPhaserRateName();
+    name = getChorusMixName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{ name, versionHint },
         name,
@@ -468,7 +468,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         "Hz"));
 
     //quality: 0.1 - 10 in 0.05 steps
-    name = gerGeneralFilterQualityName();
+    name = getGeneralFilterQualityName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{ name, versionHint },
         name,
@@ -507,7 +507,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: add APVTs
     //[DONE]: create audio parameters for all dsp choices
     //TODO: update DSP here from audio parameters
-    //TODO: save/load settingss
+    //[DONE]: save/load settings
     //TODO: save/load DSP order
     //TODO: Drag-To-Recorder GUI
     //TODO: GUI design for each DSP instance?
@@ -539,7 +539,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (size_t i = 0; i < dspPointers.size(); i++)
     {
         switch (dspOrder[i]) {
-            case DSP_Option::Phase:
+            case DSP_Option::Phaser:
                 dspPointers[i] = &phaser;
                 break;
             case DSP_Option::Chorus:
@@ -564,12 +564,12 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
-    for (size_t i = 0; i < dspPointers.size(); ++i)
-    {
-        if (dspPointers[i] != nullptr) {
-            dspPointers[i]->process(context);
-        }
-    }
+    //for (size_t i = 0; i < dspPointers.size(); ++i)
+    //{
+    //    if (dspPointers[i] != nullptr) {
+    //        dspPointers[i]->process(context);
+    //    }
+    //}
 }
 
 //==============================================================================
@@ -580,7 +580,8 @@ bool CAudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CAudioPluginAudioProcessor::createEditor()
 {
-    return new CAudioPluginAudioProcessorEditor (*this);
+    //return new CAudioPluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -589,12 +590,20 @@ void CAudioPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    juce::MemoryOutputStream mos(destData, false);
+    apvts.state.writeToStream(mos);
 }
 
 void CAudioPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid()) {
+        apvts.replaceState(tree);
+    }
 }
 
 //==============================================================================
