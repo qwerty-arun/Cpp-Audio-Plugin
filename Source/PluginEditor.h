@@ -29,5 +29,7 @@ private:
     // access the processor object that created it.
     CAudioPluginAudioProcessor& audioProcessor;
 
+    juce::TextButton dspOrderButton{ "dsp order " };
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CAudioPluginAudioProcessorEditor)
 };
