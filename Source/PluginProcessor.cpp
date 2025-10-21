@@ -612,25 +612,30 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     // now convert dspOrder into an array of pointers
     DSP_Pointers dspPointers;
-    dspPointers.fill(nullptr);
+    dspPointers.fill({}); // this was previously dspPointers.fill(nullptr);
 
     for (size_t i = 0; i < dspPointers.size(); i++)
     {
         switch (dspOrder[i]) {
             case DSP_Option::Phaser:
-                dspPointers[i] = &phaser;
+                dspPointers[i].processor = &phaser;
+                dspPointers[i].bypassed = phaserBypass->get();
                 break;
             case DSP_Option::Chorus:
-                dspPointers[i] = &chorus;
+                dspPointers[i].processor = &chorus;
+                dspPointers[i].bypassed = chorusBypass->get();
                 break;
             case DSP_Option::OverDrive:
-                dspPointers[i] = &overdrive;
+                dspPointers[i].processor = &overdrive;
+                dspPointers[i].bypassed = overdriveBypass->get();
                 break;
             case DSP_Option::LadderFilter:
-                dspPointers[i] = &ladderFilter;
+                dspPointers[i].processor = &ladderFilter;
+                dspPointers[i].bypassed = ladderFilterBypass->get();
                 break;
             case DSP_Option::GeneralFilter:
-                dspPointers[i] = &generalFilter;
+                dspPointers[i].processor = &generalFilter;
+                dspPointers[i].bypassed = generalFilterBypass->get();
                 break;
             case DSP_Option::END_OF_LIST:
                 jassertfalse;
@@ -644,9 +649,10 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     for (size_t i = 0; i < dspPointers.size(); ++i)
     {
-        if (dspPointers[i] != nullptr) 
+        if (dspPointers[i].processor != nullptr) 
         {
-            dspPointers[i]->process(context);
+            juce::ScopedValueSetter<bool> svs(context.isBypassed, dspPointers[i].bypassed);
+            dspPointers[i].processor->process(context);
         }
     }
 }
@@ -659,8 +665,8 @@ bool CAudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CAudioPluginAudioProcessor::createEditor()
 {
-    return new CAudioPluginAudioProcessorEditor (*this);
-    //return new juce::GenericAudioProcessorEditor(*this);
+    //return new CAudioPluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
