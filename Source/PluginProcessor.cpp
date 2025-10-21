@@ -566,6 +566,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TODO: add smoothers for all param updates
     //[DONE]: save/load settings
     //[DONE]: save/load DSP order
+    //[DONE] bypass DSP
     //TODO: filters are mono, not stereo
     //TODO: Drag-To-Recorder GUI
     //TODO: GUI design for each DSP instance?
@@ -602,7 +603,9 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     // try to pull
     while (dspOrderFifo.pull(newDSPOrder)) {
-
+#if VERIFY_BYPASS_FUNCTIONALITY
+        jassertfalse;
+#endif
     }
 
     // if you pulled, replace dspOrder;
@@ -652,6 +655,17 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         if (dspPointers[i].processor != nullptr) 
         {
             juce::ScopedValueSetter<bool> svs(context.isBypassed, dspPointers[i].bypassed);
+#if VERIFY_BYPASS_FUNCTIONALITY
+            if (context.isBypassed)
+            {
+                jassertfalse;
+            }
+
+            if (dspPointers[i].processor == &generalFilter)
+            {
+                continue;
+            }
+#endif
             dspPointers[i].processor->process(context);
         }
     }
@@ -744,6 +758,17 @@ void CAudioPluginAudioProcessor::setStateInformation (const void* data, int size
             dspOrderFifo.push(order);
         }
         DBG(apvts.state.toXmlString());
+
+#if VERIFY_BYPASS_FUNCTIONALITY 
+        juce::Timer::callAfterDelay(1000, [this]() {
+            DSP_Order order;
+            order.fill(DSP_Option::LadderFilter);
+            order[0] = DSP_Option::Chorus;
+
+            chorusBypass->setValueNotifyingHost(1.f);
+            dspOrderFifo.push(order);
+            });
+#endif
     }
 }
 
