@@ -854,8 +854,8 @@ bool CAudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CAudioPluginAudioProcessor::createEditor()
 {
-    //return new CAudioPluginAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new CAudioPluginAudioProcessorEditor (*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
