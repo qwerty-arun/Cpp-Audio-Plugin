@@ -34,6 +34,16 @@ static juce::String getDSPOptionName(CAudioPluginAudioProcessor::DSP_Option opti
     return "NO SELECTION";
 }
 
+ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner) : juce::TabBarButton(name, owner)
+{
+
+}
+
+juce::TabBarButton* ExtendedTabbedButtonBar::createTabButton(const juce::String& tabName, int tabIndex)
+{
+    return new ExtendedTabBarButton(tabName, *this);
+}
+
 //==============================================================================
 CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
