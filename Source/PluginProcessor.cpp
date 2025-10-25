@@ -720,7 +720,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TODO: Drag-To-Recorder GUI
     //[DONE]: snap dropped tabs to the correct position
     //[DONE]: hide dragged tab image or stop dragging the tab and constrain dragged image to x axis only
-    //TODO: restore tabs in GUI when loading settings
+    //[DONE]: restore tabs in GUI when loading settings
     //TODO: save/load preset [BONUS]
     //TODO: GUI design for each DSP instance?
     //TODO: metering
@@ -933,6 +933,7 @@ void CAudioPluginAudioProcessor::setStateInformation (const void* data, int size
         {
             auto order = juce::VariantConverter<CAudioPluginAudioProcessor::DSP_Order>::fromVar(apvts.state.getProperty("dspOrder"));
             dspOrderFifo.push(order);
+            restoreDspOrderFifo.push(order);
         }
         DBG(apvts.state.toXmlString());
 

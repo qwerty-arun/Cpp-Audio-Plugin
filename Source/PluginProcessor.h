@@ -78,7 +78,7 @@ public:
     using DSP_Order = std::array < DSP_Option, static_cast<size_t>(DSP_Option::END_OF_LIST)>;
 
     //FIFO Instance
-    SimpleMBComp::Fifo<DSP_Order> dspOrderFifo;
+    SimpleMBComp::Fifo<DSP_Order> dspOrderFifo, restoreDspOrderFifo;
 
     /*
         Phaser:

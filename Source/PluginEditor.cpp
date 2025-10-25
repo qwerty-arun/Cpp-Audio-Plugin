@@ -329,6 +329,8 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
             {
                 auto entry = r.nextInt(range);
                 v = static_cast<CAudioPluginAudioProcessor::DSP_Option>(entry);
+                auto name = getNameFromDSPOption(v);
+                DBG("creating tab: " << name);
                 tabbedComponent.addTab(getNameFromDSPOption(v), juce::Colours::white, -1);
             }
             DBG(juce::Base64::toBase64(dspOrder.data(), dspOrder.size()));
@@ -341,6 +343,7 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
     addAndMakeVisible(tabbedComponent);
 
     tabbedComponent.addListener(this);
+    startTimerHz(30);
     setSize (600, 400);
 }
 
@@ -373,5 +376,37 @@ void CAudioPluginAudioProcessorEditor::resized()
 
 void CAudioPluginAudioProcessorEditor::tabOrderChanged(CAudioPluginAudioProcessor::DSP_Order newOrder)
 {
+    audioProcessor.dspOrderFifo.push(newOrder);
+}
+
+void CAudioPluginAudioProcessorEditor::timerCallback()
+{
+    if (audioProcessor.restoreDspOrderFifo.getNumAvailableForReading() == 0)
+        return;
+
+    using T = CAudioPluginAudioProcessor::DSP_Order;
+    T newOrder;
+    newOrder.fill(CAudioPluginAudioProcessor::DSP_Option::END_OF_LIST);
+    auto empty = newOrder;
+    while (audioProcessor.restoreDspOrderFifo.pull(newOrder))
+    {
+        ; // do nothing you'll do something with the most recently pulled order next.
+    }
+
+    if (newOrder != empty) // if you pulled nothing, neworder will be filled with END_OF_LIST
+    {
+        //don't create tabs if neworder is filled with END_OF_LIST
+    }
+}
+
+void CAudioPluginAudioProcessorEditor::addTabsFromDSPOrder(CAudioPluginAudioProcessor::DSP_Order newOrder)
+{
+    tabbedComponent.clearTabs();
+    for (auto v : newOrder)
+    {
+        tabbedComponent.addTab(getNameFromDSPOption(v), juce::Colour::fromRGB(255, 255, 255), -1);
+    }
+    
+    //if the order is identical to the current order used by the audio side, this push will do nothing.
     audioProcessor.dspOrderFifo.push(newOrder);
 }
