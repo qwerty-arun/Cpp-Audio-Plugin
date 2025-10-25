@@ -694,6 +694,73 @@ void CAudioPluginAudioProcessor::MonoChannelDSP::updateDSPFromParams()
     }
 }
 
+std::vector<juce::RangedAudioParameter*> CAudioPluginAudioProcessor::getParamsForOption(DSP_Option option)
+{
+    switch (option)
+    {
+        case CAudioPluginAudioProcessor::DSP_Option::Phaser:
+        {
+            return
+            {
+                phaserRateHz,
+                phaserCenterFreqHz,
+                phaserDepthPercent,
+                phaserFeedbackPercent,
+                phaserMixPercent,
+                phaserBypass,
+            };
+        }
+        case CAudioPluginAudioProcessor::DSP_Option::Chorus:
+        {
+            return
+            {
+                chorusRateHz,
+                chorusDepthPercent,
+                chorusCenterDelayMs,
+                chorusFeedbackPercent,
+                chorusMixPercent,
+                chorusBypass,
+            };
+        }
+        case CAudioPluginAudioProcessor::DSP_Option::OverDrive:
+        {
+            return
+            {
+                overdriveSaturation,
+                overdriveBypass,
+            };
+        }
+        case CAudioPluginAudioProcessor::DSP_Option::LadderFilter:
+        {
+            return
+            {
+                ladderFilterMode,
+                ladderFilterCutoffHz,
+                ladderFilterResonance,
+                ladderFilterDrive,
+                ladderFilterBypass,
+            };
+        }
+        case CAudioPluginAudioProcessor::DSP_Option::GeneralFilter:
+        {
+            return
+            {
+                generalFilterMode,
+                generalFilterFreqHz,
+                generalFilterQuality,
+                generalFilterGain,
+                generalFilterBypass,
+            };
+        }
+        case CAudioPluginAudioProcessor::DSP_Option::END_OF_LIST:
+        {
+            break;
+        }
+    }
+    jassertfalse;
+    return {};
+};
+
 void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
