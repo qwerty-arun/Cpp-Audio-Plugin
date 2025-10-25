@@ -55,6 +55,7 @@ private:
     juce::Array<juce::TabBarButton*> getTabs();
 
     juce::ListenerList<Listener> listeners;
+    juce::ScaledImage dragImage;
 };
 
 struct HorizontalConstrainer : juce::ComponentBoundsConstrainer
