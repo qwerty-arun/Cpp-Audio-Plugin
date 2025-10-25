@@ -77,6 +77,8 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
     {
         dspOrder[i] = static_cast<DSP_Option>(i);
     }
+
+    restoreDspOrderFifo.push(dspOrder);
     
     /*
     * array of pointers to pointers->each element is a pointer to one of your member variables, like &phaserRateHz,

@@ -396,6 +396,7 @@ void CAudioPluginAudioProcessorEditor::timerCallback()
     if (newOrder != empty) // if you pulled nothing, neworder will be filled with END_OF_LIST
     {
         //don't create tabs if neworder is filled with END_OF_LIST
+        addTabsFromDSPOrder(newOrder);
     }
 }
 
