@@ -719,7 +719,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: save/load DSP order
     //[DONE] bypass DSP
     //[DONE]: filters are mono, not stereo
-    //TODO: Drag-To-Recorder GUI
+    //[DONE]: Drag-To-Reorder GUI
     //[DONE]: snap dropped tabs to the correct position
     //[DONE]: hide dragged tab image or stop dragging the tab and constrain dragged image to x axis only
     //[DONE]: restore tabs in GUI when loading settings

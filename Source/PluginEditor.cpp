@@ -218,10 +218,27 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
         If you are in the middle, you might be switching with the tab on you left, or the tab on your right.
         */
 
+#define DEBUG_TAB_MOVEMENTS false
+#if DEBUG_TAB_MOVEMENTS
+        auto getButtonName = [](auto* btn) -> juce::String
+            {
+                if (btn != nullptr)
+                    return btn->getButtonText();
+                return "None";
+            };
+        juce::String prevName = getButtonName(previousTab);
+        jassert(prevName.isNotEmpty());
+        juce::String nextName = getButtonName(nextTab);
+        jassert(nextName.isNotEmpty());
+        DBG("ETBB::itemDragMove prev: [" << prevName << "] next: [" << nextName << "]");
+#endif
+
+        auto centerX = tabButtonBeingDragged->getBounds().getCentreX();
+
         if (previousTab == nullptr && nextTab != nullptr)
         {
             //you're in the 0th position (far left)
-            if (tabButtonBeingDragged->getX() > nextTab->getBounds().getCentreX())
+            if (centerX > nextTab->getX())
             {
                 moveTab(idx, nextTabIndex);
             }
@@ -229,7 +246,7 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
         else if (previousTab != nullptr && nextTab == nullptr)
         {
             //you're in the last position (far right)
-            if (tabButtonBeingDragged->getX() < previousTab->getBounds().getCentreX())
+            if (centerX < previousTab->getX())
             {
                 moveTab(idx, previousTabIndex);
             }
@@ -237,15 +254,17 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
         else
         {
             //you're in the middle
-            if (tabButtonBeingDragged->getX() > nextTab->getBounds().getCentreX())
+            if (centerX > nextTab->getX())
             {
                 moveTab(idx, nextTabIndex);
             }
-            else if(tabButtonBeingDragged->getX() < previousTab->getBounds().getCentreX())
+            else if(centerX < previousTab->getRight())
             {
                 moveTab(idx, previousTabIndex);
             }
         }
+
+        tabButtonBeingDragged->toFront(true);
     }
 }
 
