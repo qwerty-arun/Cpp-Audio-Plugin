@@ -86,6 +86,8 @@ struct ExtendedTabBarButton : juce::TabBarButton
 
     void mouseDrag(const juce::MouseEvent& e) override;
     CAudioPluginAudioProcessor::DSP_Option getOption() const { return option; }
+
+    int getBestTabLength(int depth) override;
 private:
     CAudioPluginAudioProcessor::DSP_Option option;
 };
