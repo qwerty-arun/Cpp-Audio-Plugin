@@ -40,10 +40,21 @@ struct ExtendedTabbedButtonBar : juce::TabbedButtonBar, juce::DragAndDropTarget,
 
     juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override;
 
+    struct Listener
+    {
+        virtual ~Listener() = default;
+        virtual void tabOrderChanged(CAudioPluginAudioProcessor::DSP_Order newOrder) = 0;
+    };
+
+    void addListener(Listener* l);
+    void removeListener(Listener* l);
+
 private:
     juce::TabBarButton* findDraggedItem(const SourceDetails& dragSourceDetails);
     int findDraggedItemIndex(const SourceDetails& dragSourceDetails);
     juce::Array<juce::TabBarButton*> getTabs();
+
+    juce::ListenerList<Listener> listeners;
 };
 
 struct HorizontalConstrainer : juce::ComponentBoundsConstrainer
@@ -66,18 +77,21 @@ private:
 
 struct ExtendedTabBarButton : juce::TabBarButton
 {
-    ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner);
+    ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner, CAudioPluginAudioProcessor::DSP_Option dspOption);
     juce::ComponentDragger dragger;
     std::unique_ptr<HorizontalConstrainer> constrainer;
 
     void mouseDown(const juce::MouseEvent& e) override;
 
     void mouseDrag(const juce::MouseEvent& e) override;
+    CAudioPluginAudioProcessor::DSP_Option getOption() const { return option; }
+private:
+    CAudioPluginAudioProcessor::DSP_Option option;
 };
 //==============================================================================
 /**
 */
-class CAudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
+class CAudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, ExtendedTabbedButtonBar::Listener
 {
 public:
     CAudioPluginAudioProcessorEditor (CAudioPluginAudioProcessor&);
@@ -86,6 +100,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void tabOrderChanged(CAudioPluginAudioProcessor::DSP_Order newOrder) override;
 
 private:
     // This reference is provided as a quick way for your editor to

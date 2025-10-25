@@ -34,6 +34,22 @@ static juce::String getDSPOptionName(CAudioPluginAudioProcessor::DSP_Option opti
     return "NO SELECTION";
 }
 
+static CAudioPluginAudioProcessor::DSP_Option getDSPOptionFromName(juce::String name)
+{
+    if (name == "PHASER")
+        return CAudioPluginAudioProcessor::DSP_Option::Phaser;     
+    if (name == "CHORUS")
+        return CAudioPluginAudioProcessor::DSP_Option::Chorus;
+    if (name == "OVERDRIVE")
+        return CAudioPluginAudioProcessor::DSP_Option::OverDrive;
+    if (name == "LADDERFILTER")
+        return CAudioPluginAudioProcessor::DSP_Option::LadderFilter;
+    if (name == "GEN FILTER")
+        return CAudioPluginAudioProcessor::DSP_Option::GeneralFilter;
+    
+    return CAudioPluginAudioProcessor::DSP_Option::END_OF_LIST;
+}
+
 HorizontalConstrainer::HorizontalConstrainer(std::function<juce::Rectangle<int>()> confinerBoundsGetter,
                                              std::function<juce::Rectangle<int>()> confineeBoundsGetter) 
                                                 : 
@@ -86,7 +102,7 @@ void HorizontalConstrainer::checkBounds(juce::Rectangle<int>& bounds,
 
 }
 
-ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner) : juce::TabBarButton(name, owner)
+ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner, CAudioPluginAudioProcessor::DSP_Option dspOption) : juce::TabBarButton(name, owner), option(dspOption)
 {
     constrainer = std::make_unique<HorizontalConstrainer>([&owner]() { return owner.getLocalBounds(); },
                                                             [this]() { return getBounds();});
@@ -168,6 +184,7 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
         //it might be on the left
         //if it's on the right,
         //if tabButtonBeingDragged's x is > nextTab.getX() + nextTab.getWidth() * 0.5, swap their position
+
         auto previousTabIndex = idx - 1;
         auto nextTabIndex = idx + 1;
         auto previousTab = getTabButton(previousTabIndex);
@@ -222,6 +239,24 @@ void ExtendedTabbedButtonBar::itemDropped(const SourceDetails& dragSourceDetails
     DBG("item dropped");
     //find the dropped item. lock the position in.
     resized();
+
+    //notify of the new tab order
+    auto tabs = getTabs();
+    CAudioPluginAudioProcessor::DSP_Order newOrder;
+
+    jassert(tabs.size() == newOrder.size());
+    for (size_t i = 0; i < tabs.size(); i++)
+    {
+        auto tab = tabs[static_cast<int>(i)];
+        if (auto* etbb = dynamic_cast<ExtendedTabBarButton*>(tab))
+        {
+            newOrder[i] = etbb->getOption();
+        }
+    }
+
+    listeners.call([newOrder](Listener& l) {
+        l.tabOrderChanged(newOrder);
+        });
 }
 
 void ExtendedTabbedButtonBar::mouseDown(const juce::MouseEvent& e)
@@ -235,12 +270,22 @@ void ExtendedTabbedButtonBar::mouseDown(const juce::MouseEvent& e)
 
 juce::TabBarButton* ExtendedTabbedButtonBar::createTabButton(const juce::String& tabName, int tabIndex)
 {
-    auto etbb = std::make_unique<ExtendedTabBarButton>(tabName, *this);
+    auto dspOption = getDSPOptionFromName(tabName);
+    auto etbb = std::make_unique<ExtendedTabBarButton>(tabName, *this, dspOption);
     etbb->addMouseListener(this, false);
 
     return etbb.release();
 }
 
+void ExtendedTabbedButtonBar::addListener(Listener *l)
+{
+    listeners.add(l);
+}
+
+void ExtendedTabbedButtonBar::removeListener(Listener *l)
+{
+    listeners.remove(l);
+}
 
 
 //==============================================================================
@@ -273,11 +318,14 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
 
     addAndMakeVisible(dspOrderButton);
     addAndMakeVisible(tabbedComponent);
+
+    tabbedComponent.addListener(this);
     setSize (400, 300);
 }
 
 CAudioPluginAudioProcessorEditor::~CAudioPluginAudioProcessorEditor()
 {
+    tabbedComponent.removeListener(this);
 }
 
 //==============================================================================
@@ -300,4 +348,9 @@ void CAudioPluginAudioProcessorEditor::resized()
     dspOrderButton.setBounds(bounds.removeFromTop(30).withSizeKeepingCentre(150, 30));
     bounds.removeFromTop(10);
     tabbedComponent.setBounds(bounds.withHeight(30));
+}
+
+void CAudioPluginAudioProcessorEditor::tabOrderChanged(CAudioPluginAudioProcessor::DSP_Order newOrder)
+{
+    audioProcessor.dspOrderFifo.push(newOrder);
 }
