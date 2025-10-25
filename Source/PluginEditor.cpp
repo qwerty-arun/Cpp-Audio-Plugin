@@ -335,30 +335,6 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    dspOrderButton.onClick = [this]()
-        {
-            juce::Random r;
-            CAudioPluginAudioProcessor::DSP_Order dspOrder;
-
-            auto range = juce::Range<int>(static_cast<int>(CAudioPluginAudioProcessor::DSP_Option::Phaser), 
-                                          static_cast<int>(CAudioPluginAudioProcessor::DSP_Option::END_OF_LIST));
-
-            tabbedComponent.clearTabs();
-            for (auto& v : dspOrder)
-            {
-                auto entry = r.nextInt(range);
-                v = static_cast<CAudioPluginAudioProcessor::DSP_Option>(entry);
-                auto name = getNameFromDSPOption(v);
-                DBG("creating tab: " << name);
-                tabbedComponent.addTab(getNameFromDSPOption(v), juce::Colours::white, -1);
-            }
-            DBG(juce::Base64::toBase64(dspOrder.data(), dspOrder.size()));
-            //jassertfalse;
-
-            audioProcessor.dspOrderFifo.push(dspOrder);
-        };
-
-    addAndMakeVisible(dspOrderButton);
     addAndMakeVisible(tabbedComponent);
 
     tabbedComponent.addListener(this);
@@ -388,7 +364,6 @@ void CAudioPluginAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
-    dspOrderButton.setBounds(bounds.removeFromTop(30).withSizeKeepingCentre(150, 30));
     bounds.removeFromTop(10);
     tabbedComponent.setBounds(bounds.withHeight(30));
 }

@@ -111,8 +111,6 @@ private:
     // access the processor object that created it.
     CAudioPluginAudioProcessor& audioProcessor;
 
-    juce::TextButton dspOrderButton{ "dsp order " };
-
     ExtendedTabbedButtonBar tabbedComponent;
 
     void addTabsFromDSPOrder(CAudioPluginAudioProcessor::DSP_Order);
