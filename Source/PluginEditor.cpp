@@ -327,6 +327,94 @@ void ExtendedTabbedButtonBar::removeListener(Listener *l)
     listeners.remove(l);
 }
 
+void DSP_Gui::resized()
+{
+    auto bounds = getLocalBounds();
+    if (buttons.empty() == false)
+    {
+        auto buttonArea = bounds.removeFromTop(30);
+        auto w = buttonArea.getWidth() / buttons.size();
+        for (auto& button : buttons)
+        {
+            button->setBounds(buttonArea.removeFromLeft(static_cast<int>(w)));
+        }
+    }
+
+    if (comboBoxes.empty() == false)
+    {
+        auto comboBoxArea = bounds.removeFromLeft(bounds.getWidth() / 4);
+        auto h = juce::jmin(comboBoxArea.getHeight() / static_cast<int>(comboBoxes.size()), 30);
+        for (auto& cb : comboBoxes)
+        {
+            cb->setBounds(comboBoxArea.removeFromTop(static_cast<int>(h)));
+        }
+    }
+
+    if (sliders.empty() == false)
+    {
+        auto w = bounds.getWidth() / sliders.size();
+        for (auto& slider : sliders)
+        {
+            slider->setBounds(bounds.removeFromLeft(static_cast<int>(w)));
+        }
+    }
+}
+
+void DSP_Gui::paint(juce::Graphics& g) 
+{ 
+    g.fillAll(juce::Colours::black); 
+};
+
+void DSP_Gui::rebuildInterface(std::vector<juce::RangedAudioParameter*> params)
+{
+    sliderAttachments.clear();
+    comboboxAttachments.clear();
+    buttonAttachments.clear();
+
+    sliders.clear();
+    comboBoxes.clear();
+    buttons.clear();
+
+    for (size_t i = 0; i < params.size(); i++)
+    {
+        auto p = params[i];
+
+        if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(p))
+        {
+            //make a combobox
+            comboBoxes.push_back(std::make_unique<juce::ComboBox>());
+            auto& cb = *comboBoxes.back();
+            cb.addItemList(choice->choices, 1);
+            comboboxAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment > (processor.apvts, p->getName(100), cb));
+        }
+        else if (auto* toggle = dynamic_cast<juce::AudioParameterBool*>(p))
+        {
+            //make a toggle button
+            buttons.push_back(std::make_unique<juce::ToggleButton>("Bypasss"));
+            auto& btn = *buttons.back();
+            buttonAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(processor.apvts, p->getName(100), btn));
+        }
+        else
+        {
+            //it's a float or int param make a slider
+            sliders.push_back(std::make_unique<juce::Slider>());
+            auto& slider = *sliders.back();
+            slider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+            sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.apvts, p->getName(100), slider));
+
+        }
+    }
+    for (auto& slider : sliders)
+        addAndMakeVisible(slider.get());
+
+    for (auto& cb : comboBoxes)
+        addAndMakeVisible(cb.get());
+
+    for (auto& btn : buttons)
+        addAndMakeVisible(btn.get());
+
+    resized();
+}
 
 //==============================================================================
 CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPluginAudioProcessor& p)
@@ -372,6 +460,7 @@ void CAudioPluginAudioProcessorEditor::resized()
 
 void CAudioPluginAudioProcessorEditor::tabOrderChanged(CAudioPluginAudioProcessor::DSP_Order newOrder)
 {
+    rebuildInterface();
     audioProcessor.dspOrderFifo.push(newOrder);
 }
 
@@ -403,7 +492,20 @@ void CAudioPluginAudioProcessorEditor::addTabsFromDSPOrder(CAudioPluginAudioProc
     {
         tabbedComponent.addTab(getNameFromDSPOption(v), juce::Colour::fromRGB(255, 255, 255), -1);
     }
-    
+    rebuildInterface();
     //if the order is identical to the current order used by the audio side, this push will do nothing.
     audioProcessor.dspOrderFifo.push(newOrder);
+}
+
+void CAudioPluginAudioProcessorEditor::rebuildInterface()
+{
+    auto currentTabIndex = tabbedComponent.getCurrentTabIndex();
+    auto currentTab = tabbedComponent.getTabButton(currentTabIndex);
+    if (auto etbb = dynamic_cast<ExtendedTabBarButton*>(currentTab))
+    {
+        auto option = etbb->getOption();
+        auto params = audioProcessor.getParamsForOption(option);
+        jassert(params.empty() == false);
+        dspGUI.rebuildInterface(params);
+    }
 }
