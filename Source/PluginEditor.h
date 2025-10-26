@@ -94,16 +94,19 @@ private:
 
 struct DSP_Gui : juce::Component
 {
-    DSP_Gui(CAudioPluginAudioProcessor& p) : processor(p) {};
+    DSP_Gui(CAudioPluginAudioProcessor& p);
 
     void resized() override;
     void paint(juce::Graphics& g) override;
 
     void rebuildInterface(std::vector<juce::RangedAudioParameter*> params);
+
     CAudioPluginAudioProcessor& processor;
+
     std::vector <std::unique_ptr<juce::Slider>> sliders;
     std::vector <std::unique_ptr<juce::ComboBox>> comboBoxes;
     std::vector <std::unique_ptr<juce::Button>> buttons;
+
     std::vector <std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> sliderAttachments;
     std::vector <std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>> comboboxAttachments;
     std::vector <std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment>> buttonAttachments;
