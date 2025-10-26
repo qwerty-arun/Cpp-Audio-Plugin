@@ -429,7 +429,7 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-
+    setLookAndFeel(&lookAndFeel);
     addAndMakeVisible(tabbedComponent);
     addAndMakeVisible(dspGUI);
 
@@ -440,6 +440,7 @@ CAudioPluginAudioProcessorEditor::CAudioPluginAudioProcessorEditor (CAudioPlugin
 
 CAudioPluginAudioProcessorEditor::~CAudioPluginAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
     tabbedComponent.removeListener(this);
 }
 
