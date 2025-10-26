@@ -795,35 +795,37 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    //[DONE]: add APVTs
-    //[DONE]: create audio parameters for all dsp choices
-    //[DONE]: update DSP here from audio parameters
-    //[DONE]: bypass params for each DSP element
-    //[DONE]: update general filter coefficients
-    //[DONE]: add smoothers for all param updates
-    //[DONE]: save/load settings
-    //[DONE]: save/load DSP order
-    //[DONE] bypass DSP
-    //[DONE]: filters are mono, not stereo
-    //[DONE]: Drag-To-Reorder GUI
-    //[DONE]: snap dropped tabs to the correct position
-    //[DONE]: hide dragged tab image or stop dragging the tab and constrain dragged image to x axis only
-    //[DONE]: restore tabs in GUI when loading settings
+    //DONE: add APVTs
+    //DONE: create audio parameters for all dsp choices
+    //DONE: update DSP here from audio parameters
+    //DONE: bypass params for each DSP element
+    //DONE: update general filter coefficients
+    //DONE: add smoothers for all param updates
+    //DONE: save/load settings
+    //DONE: save/load DSP order
+    //DONE bypass DSP
+    //DONE: filters are mono, not stereo
+    //DONE: Drag-To-Reorder GUI
+    //DONE: snap dropped tabs to the correct position
+    //DONE: hide dragged tab image or stop dragging the tab and constrain dragged image to x axis only
+    //DONE: restore tabs in GUI when loading settings
     //TODO: save/load preset [BONUS]
     //TODO: GUI design for each DSP instance?
+    //TODO: Fix graphic issue when dragging tab over bypass button
     //DONE: Add bypass button to tabs
-    //TODO: make selected tab more obvious
+    //DONE: make selected tab more obvious
     //DONE: mouse-down on tab (during drag) should change DSP_Gui
-    //[DONE]: replace vertical sliders with SimpleMBComp rotary sliders
+    //DONE: replace vertical sliders with SimpleMBComp rotary sliders
     //DONE: replace ComboBoxes with SimpleMBComp combobox
-    //[DONE]: replace bypass buttons with SimpleMBComp bypass buttons.
+    //DONE: replace bypass buttons with SimpleMBComp bypass buttons.
     //DONE: restore selected tab when window opens
     //DONE: restore tab order when window opens
     //DONE: restore tab order when window opens first time (after quit)
     //DONE: restore tabs when closing/opening window (no quit)
     //DONE: restore selected tab when closing/opening window (now quit)
     //DONE: metering
-    //[DONE]: prepare all DSP
+    //DONE: prepare all DSP
+    // 
     //TODO: wet/dry know [BONUS]
     //TODO: mono & stereo versions [mono is BONUS]
     //TODO: modulators [BONUS]
