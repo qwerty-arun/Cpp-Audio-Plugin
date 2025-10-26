@@ -286,6 +286,8 @@ void CAudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     inputGainDSP.prepare(spec);
     outputGainDSP.prepare(spec);
 
+    leftSCSF.prepare(samplesPerBlock);
+    rightSCSF.prepare(samplesPerBlock);
 }
 
 
@@ -846,7 +848,8 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //DONE: hide dragged tab image or stop dragging the tab and constrain dragged image to x axis only
     //DONE: restore tabs in GUI when loading settings
     //TODO: save/load preset [BONUS]
-    //TODO: GUI design for each DSP instance?
+    //DONE: GUI design for each DSP instance
+    //DONE: add spectrum analyzer from SimpleMBComp
     //DONE: restore selected tab when window opens
     //DONE: bypass button should toggle RotarySlider enablement
     //DONE: Fix graphic issue when dragging tab over bypass button
@@ -955,6 +958,8 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftPostRMS.set(buffer.getRMSLevel(0, 0, numSamples));
     rightPostRMS.set(buffer.getRMSLevel(1, 0, numSamples));
 
+    leftSCSF.update(buffer);
+    rightSCSF.update(buffer);
 }
 
 void CAudioPluginAudioProcessor::MonoChannelDSP::process(juce::dsp::AudioBlock<float> block, const DSP_Order &dspOrder)

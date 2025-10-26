@@ -6,6 +6,17 @@
   <MAINGROUP id="leXwCW" name="C++ Audio Plugin">
     <GROUP id="{8654F65D-939B-A8C2-5BBC-6587B0A6FAF6}" name="Source">
       <GROUP id="{A87A57D7-D168-2D41-19B7-5D00A2F8C83A}" name="GUI">
+        <FILE id="Wm6GmP" name="FFTDataGenerator.h" compile="0" resource="0"
+              file="SimpleMultiBandComp/Source/GUI/FFTDataGenerator.h"/>
+        <FILE id="RTHmzd" name="SpectrumAnalyzer.cpp" compile="1" resource="0"
+              file="SimpleMultiBandComp/Source/GUI/SpectrumAnalyzer.cpp"/>
+        <FILE id="AylxIW" name="SpectrumAnalyzer.h" compile="0" resource="0"
+              file="SimpleMultiBandComp/Source/GUI/SpectrumAnalyzer.h"/>
+        <FILE id="NSUYfv" name="PathProducer.h" compile="0" resource="0" file="SimpleMultiBandComp/Source/GUI/PathProducer.h"/>
+        <FILE id="c0yZkf" name="PathProducer.cpp" compile="1" resource="0"
+              file="SimpleMultiBandComp/Source/GUI/PathProducer.cpp"/>
+        <FILE id="ToqTTK" name="AnalyzerPathGenerator.h" compile="0" resource="0"
+              file="SimpleMultiBandComp/Source/GUI/AnalyzerPathGenerator.h"/>
         <FILE id="ZT0yHF" name="CustomButtons.cpp" compile="1" resource="0"
               file="SimpleMultiBandComp/Source/GUI/CustomButtons.cpp"/>
         <FILE id="KNjpke" name="CustomButtons.h" compile="0" resource="0" file="SimpleMultiBandComp/Source/GUI/CustomButtons.h"/>
@@ -20,6 +31,8 @@
       </GROUP>
       <GROUP id="{DA4D6054-6E63-4BEB-76BB-DD695C721BAB}" name="DSP">
         <FILE id="T6ACXX" name="Fifo.h" compile="0" resource="0" file="SimpleMultiBandComp/Source/DSP/Fifo.h"/>
+        <FILE id="dmXKoE" name="SingleChannelSampleFifo.h" compile="0" resource="0"
+              file="SimpleMultiBandComp/Source/DSP/SingleChannelSampleFifo.h"/>
       </GROUP>
       <FILE id="JEhBaH" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

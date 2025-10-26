@@ -12,6 +12,7 @@
 #include "PluginProcessor.h"
 #include <LookAndFeel.h>
 #include <CustomButtons.h> //For Powerbutton
+#include <SpectrumAnalyzer.h>
 
 template<typename ParamsContainer>
 static juce::AudioParameterBool* findBypassParam(const ParamsContainer& params)
@@ -177,6 +178,13 @@ private:
     DSP_Gui dspGUI{ audioProcessor };
     ExtendedTabbedButtonBar tabbedComponent;
     
+    SimpleMBComp::SpectrumAnalyzer analyzer
+    {
+        audioProcessor,
+        audioProcessor.leftSCSF,
+        audioProcessor.rightSCSF
+    };
+
     static constexpr int meterWidth = 80;
     static constexpr int fontHeight = 24;
     static constexpr int tickIndent = 8;
