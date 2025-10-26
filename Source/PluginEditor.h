@@ -57,9 +57,12 @@ private:
     juce::TabBarButton* findDraggedItem(const SourceDetails& dragSourceDetails);
     int findDraggedItemIndex(const SourceDetails& dragSourceDetails);
     juce::Array<juce::TabBarButton*> getTabs();
-
+    
+    bool reorderTabsAfterDrop();
     juce::ListenerList<Listener> listeners;
     juce::ScaledImage dragImage;
+    juce::Array<juce::TabBarButton*> tabs;
+    juce::Point<int> previousDraggedTabCenterPosition;
 };
 
 struct HorizontalConstrainer : juce::ComponentBoundsConstrainer
