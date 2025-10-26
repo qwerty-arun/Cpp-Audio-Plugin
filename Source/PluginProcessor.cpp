@@ -61,6 +61,9 @@ auto getGeneralFilterBypassName() { return juce::String("General Filter Bypass")
 
 auto getSelectedTabName() { return juce::String("Selected Tab"); }
 
+auto getInputGainName() { return juce::String("Input gain dB"); }
+auto getOutputGainName() { return juce::String("Output gain dB"); }
+
 //==============================================================================
 CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -108,6 +111,9 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &generalFilterFreqHz,
         &generalFilterQuality,
         &generalFilterGain,
+
+        &inputGain,
+        &outputGain,
     };
 
     // array of function pointers -> each one returns the string ID of a parameter
@@ -134,6 +140,9 @@ CAudioPluginAudioProcessor::CAudioPluginAudioProcessor()
         &getGeneralFilterFreqName,
         &getGeneralFilterQualityName,
         &getGeneralFilterGainName,
+
+        &getInputGainName,
+        &getOutputGainName,
     };
 
     initCachedParams<juce::AudioParameterFloat*>(floatParams, floatNameFuncs);
@@ -260,6 +269,7 @@ void CAudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
+    
     spec.numChannels = 1;
     leftChannel.prepare(spec);
     rightChannel.prepare(spec);
@@ -270,6 +280,12 @@ void CAudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     }
 
     updateSmoothersFromParams(1, SmootherUpdateMode::initialize);
+
+    spec.numChannels = getTotalNumInputChannels();
+
+    inputGainDSP.prepare(spec);
+    outputGainDSP.prepare(spec);
+
 }
 
 
@@ -294,6 +310,8 @@ void CAudioPluginAudioProcessor::updateSmoothersFromParams(int numSamplesToSkip,
         generalFilterFreqHz,
         generalFilterQuality,
         generalFilterGain,
+        inputGain,
+        outputGain,
     };
 
     auto smoothers = getSmoothers();
@@ -333,7 +351,9 @@ std::vector<juce::SmoothedValue<float>*> CAudioPluginAudioProcessor::getSmoother
         &ladderFilterDriveSmoother,
         &generalFilterFreqHzSmoother,
         &generalFilterQualitySmoother,
-        &generalFilterGainSmoother
+        &generalFilterGainSmoother,
+        &inputGainSmoother,
+        &outputGainSmoother,
     };
 
     return smoothers;
@@ -410,9 +430,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout CAudioPluginAudioProcessor::
         Feedback: -1 to +1
         Mix: 0 to 1
     */
+    auto name = getInputGainName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(-18.f, 18.f, 0.1f, 1.f),
+        0.f,
+        "dB"));
+
+    name = getOutputGainName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ name, versionHint },
+        name,
+        juce::NormalisableRange<float>(-18.f, 18.f, 0.1f, 1.f),
+        0.f,
+        "dB"));
 
     //phaser rate
-    auto name = getPhaserRateName();
+    name = getPhaserRateName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{ name, versionHint },
         name,
@@ -673,27 +708,27 @@ void CAudioPluginAudioProcessor::MonoChannelDSP::updateDSPFromParams()
 
         switch (filterMode)
         {
-            case CAudioPluginAudioProcessor::GeneralFilterMode::Peak:
+            case GeneralFilterMode::Peak:
             {
                 coefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, filterFreq, filterQ, juce::Decibels::decibelsToGain(filterGain));
                 break;
             }
-            case CAudioPluginAudioProcessor::GeneralFilterMode::Bandpass:
+            case GeneralFilterMode::Bandpass:
             {
                 coefficients = juce::dsp::IIR::Coefficients<float>::makeBandPass(sampleRate, filterFreq, filterQ);
                 break;
             }
-            case CAudioPluginAudioProcessor::GeneralFilterMode::Notch:
+            case GeneralFilterMode::Notch:
             {
                 coefficients = juce::dsp::IIR::Coefficients<float>::makeNotch(sampleRate, filterFreq, filterQ);
                 break;
             }
-            case CAudioPluginAudioProcessor::GeneralFilterMode::Allpass:
+            case GeneralFilterMode::Allpass:
             {
                 coefficients = juce::dsp::IIR::Coefficients<float>::makeAllPass(sampleRate, filterFreq, filterQ);
                 break;
             }
-            case CAudioPluginAudioProcessor::GeneralFilterMode::END_OF_LIST:
+            case GeneralFilterMode::END_OF_LIST:
             {
                 jassertfalse;
                 break;
@@ -801,6 +836,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //DONE: bypass params for each DSP element
     //DONE: update general filter coefficients
     //DONE: add smoothers for all param updates
+    //TODO: in/out gain controls
     //DONE: save/load settings
     //DONE: save/load DSP order
     //DONE bypass DSP
@@ -864,6 +900,14 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //leftChannel.process(block.getSingleChannelBlock(0), dspOrder);
     //rightChannel.process(block.getSingleChannelBlock(1), dspOrder);
 
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    auto preCtx = juce::dsp::ProcessContextReplacing<float>(block);
+
+    inputGainSmoother.setTargetValue(inputGain->get());
+    outputGainSmoother.setTargetValue(outputGain->get());
+    inputGainDSP.setGainDecibels(inputGainSmoother.getNextValue());
+    inputGainDSP.process(preCtx);
+
     /*
         process max 64 samples at a time.
     */
@@ -874,7 +918,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftPreRMS.set(buffer.getRMSLevel(0, 0, numSamples));
     rightPreRMS.set(buffer.getRMSLevel(1, 0, numSamples));
     
-    auto block = juce::dsp::AudioBlock<float>(buffer);
+ 
     size_t startSample = 0; // (10)
     while (samplesRemaining > 0) // (3)
     {
@@ -902,6 +946,10 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         startSample += samplesToProcess; // (9)
         samplesRemaining -= samplesToProcess;
     }
+
+    auto postCtx = juce::dsp::ProcessContextReplacing<float>(block);
+    outputGainDSP.setGainDecibels(outputGainSmoother.getNextValue());
+    outputGainDSP.process(postCtx);
 
     leftPostRMS.set(buffer.getRMSLevel(0, 0, numSamples));
     rightPostRMS.set(buffer.getRMSLevel(1, 0, numSamples));

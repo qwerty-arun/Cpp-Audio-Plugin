@@ -15,6 +15,15 @@
 static constexpr int NEGATIVE_INFINITY = -72;
 static constexpr int MAX_DECIBELS = 12;
 
+enum class GeneralFilterMode
+{
+    Peak,
+    Bandpass,
+    Notch,
+    Allpass,
+    END_OF_LIST
+};
+
 //==============================================================================
 /**
 */
@@ -124,6 +133,9 @@ public:
 
     juce::AudioParameterInt* selectedTab = nullptr;
 
+    juce::AudioParameterFloat* inputGain = nullptr;
+    juce::AudioParameterFloat* outputGain = nullptr;
+
     juce::SmoothedValue<float>
         phaserRateHzSmoother,
         phaserCenterFreqHzSmoother,
@@ -141,25 +153,21 @@ public:
         ladderFilterDriveSmoother,
         generalFilterFreqHzSmoother,
         generalFilterQualitySmoother,
-        generalFilterGainSmoother;
+        generalFilterGainSmoother,
+        inputGainSmoother,
+        outputGainSmoother;
 
     juce::Atomic<bool> guiNeedsLatestDspOrder{ false };
     juce::Atomic<float> leftPreRMS, rightPreRMS, leftPostRMS, rightPostRMS;
 
 
-    enum class GeneralFilterMode
-    {
-        Peak,
-        Bandpass,
-        Notch,
-        Allpass,
-        END_OF_LIST
-    };
+
 
     std::vector<juce::RangedAudioParameter*> getParamsForOption(DSP_Option option);
 
 private:
     DSP_Order dspOrder; // Create an object
+    juce::dsp::Gain<float> inputGainDSP, outputGainDSP;
     
     template<typename DSP> // class template, we can create versions for different DSP effect types
     struct DSP_Choice : juce::dsp::ProcessorBase
