@@ -817,8 +817,11 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: replace vertical sliders with SimpleMBComp rotary sliders
     //TODO: replace ComboBoxes with SimpleMBComp combobox
     //[DONE]: replace bypass buttons with SimpleMBComp bypass buttons.
-    //TODO: restore selected tab when window opens
-    //TODO: restore tab order when window opens
+    //DONE: restore selected tab when window opens
+    //DONE: restore tab order when window opens
+    //TODO: restore tab order when window opens first time (after quit)
+    //TODO: restore tabs when closing/opening window (no quit)
+    //TODO: restore selected tab when closing/opening window (now quit)
     //TODO: metering
     //[DONE]: prepare all DSP
     //TODO: wet/dry know [BONUS]
