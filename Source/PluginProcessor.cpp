@@ -811,7 +811,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: restore tabs in GUI when loading settings
     //TODO: save/load preset [BONUS]
     //TODO: GUI design for each DSP instance?
-    //TODO: Add bypass button to tabs
+    //DONE: Add bypass button to tabs
     //TODO: make selected tab more obvious
     //DONE: mouse-down on tab (during drag) should change DSP_Gui
     //[DONE]: replace vertical sliders with SimpleMBComp rotary sliders
