@@ -472,6 +472,21 @@ void DSP_Gui::rebuildInterface(std::vector<juce::RangedAudioParameter*> params)
     {
         auto p = params[i];
 
+        if (dynamic_cast<juce::AudioParameterBool*>(p))
+        {
+            DBG("skipping button attachments");
+        }
+        else
+        {
+            //sliders are used for float and choid params
+            sliders.push_back(std::make_unique<RotarySliderWithLabels>(p, p->label, p->getName(100)));
+            auto& slider = *sliders.back();
+            SimpleMBComp::addLabelPairs(slider.labels, *p, p->label);
+            slider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+            sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.apvts, p->getName(100), slider));
+        }
+
+#if false
         if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(p))
         {
             //make a combobox
@@ -497,6 +512,8 @@ void DSP_Gui::rebuildInterface(std::vector<juce::RangedAudioParameter*> params)
             slider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
             sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.apvts, p->getName(100), slider));
         }
+#endif
+
     }
     for (auto& slider : sliders)
         addAndMakeVisible(slider.get());

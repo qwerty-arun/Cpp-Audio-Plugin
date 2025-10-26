@@ -815,7 +815,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TODO: make selected tab more obvious
     //DONE: mouse-down on tab (during drag) should change DSP_Gui
     //[DONE]: replace vertical sliders with SimpleMBComp rotary sliders
-    //TODO: replace ComboBoxes with SimpleMBComp combobox
+    //DONE: replace ComboBoxes with SimpleMBComp combobox
     //[DONE]: replace bypass buttons with SimpleMBComp bypass buttons.
     //DONE: restore selected tab when window opens
     //DONE: restore tab order when window opens
