@@ -140,6 +140,8 @@ public:
         generalFilterQualitySmoother,
         generalFilterGainSmoother;
 
+    juce::Atomic<bool> guiNeedsLatestDspOrder{ false };
+
     enum class GeneralFilterMode
     {
         Peak,
