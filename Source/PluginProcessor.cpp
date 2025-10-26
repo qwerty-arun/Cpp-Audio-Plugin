@@ -865,8 +865,12 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     /*
         process max 64 samples at a time.
     */
-    auto samplesRemaining = buffer.getNumSamples(); // (1)
+    const auto numSamples = buffer.getNumSamples(); // (1)
+    auto samplesRemaining = numSamples;
     auto maxSamplesToProcess = juce::jmin(samplesRemaining, 64); // (2)
+
+    leftPreRMS.set(buffer.getRMSLevel(0, 0, numSamples));
+    rightPreRMS.set(buffer.getRMSLevel(1, 0, numSamples));
     
     auto block = juce::dsp::AudioBlock<float>(buffer);
     size_t startSample = 0; // (10)
@@ -896,6 +900,10 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         startSample += samplesToProcess; // (9)
         samplesRemaining -= samplesToProcess;
     }
+
+    leftPostRMS.set(buffer.getRMSLevel(0, 0, numSamples));
+    rightPostRMS.set(buffer.getRMSLevel(1, 0, numSamples));
+
 }
 
 void CAudioPluginAudioProcessor::MonoChannelDSP::process(juce::dsp::AudioBlock<float> block, const DSP_Order &dspOrder)
