@@ -822,7 +822,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //DONE: restore tab order when window opens first time (after quit)
     //DONE: restore tabs when closing/opening window (no quit)
     //DONE: restore selected tab when closing/opening window (now quit)
-    //TODO: metering
+    //DONE: metering
     //[DONE]: prepare all DSP
     //TODO: wet/dry know [BONUS]
     //TODO: mono & stereo versions [mono is BONUS]
