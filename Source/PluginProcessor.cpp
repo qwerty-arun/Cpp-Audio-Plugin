@@ -847,7 +847,7 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //DONE: restore tabs in GUI when loading settings
     //TODO: save/load preset [BONUS]
     //TODO: GUI design for each DSP instance?
-    //TODO: restore selected tab when window opens
+    //DONE: restore selected tab when window opens
     //TODO: bypass button should toggle RotarySlider enablement
     //DONE: Fix graphic issue when dragging tab over bypass button
     //DONE: Add bypass button to tabs
@@ -863,7 +863,6 @@ void CAudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //DONE: restore selected tab when closing/opening window (now quit)
     //DONE: metering
     //DONE: prepare all DSP
-    // 
     //TODO: wet/dry know [BONUS]
     //TODO: mono & stereo versions [mono is BONUS]
     //TODO: modulators [BONUS]
