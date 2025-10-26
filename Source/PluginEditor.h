@@ -92,6 +92,8 @@ private:
     CAudioPluginAudioProcessor::DSP_Option option;
 };
 
+struct RotarySliderWithLabels;
+
 struct DSP_Gui : juce::Component
 {
     DSP_Gui(CAudioPluginAudioProcessor& p);
@@ -103,7 +105,7 @@ struct DSP_Gui : juce::Component
 
     CAudioPluginAudioProcessor& processor;
 
-    std::vector <std::unique_ptr<juce::Slider>> sliders;
+    std::vector <std::unique_ptr<RotarySliderWithLabels>> sliders;
     std::vector <std::unique_ptr<juce::ComboBox>> comboBoxes;
     std::vector <std::unique_ptr<juce::Button>> buttons;
 
